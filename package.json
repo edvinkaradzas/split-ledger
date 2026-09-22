@@ -1,28 +1,43 @@
 {
-  "name": "js-cli-template",
-  "version": "1.0.0",
-  "description": "1DV610 - JavaScript CLI Template / Boilerplate",
+  "name": "split-ledger",
+  "version": "0.0.0",
+  "description": "Track shared group expenses and calculate who owes whom, with as few transfers as possible.",
+  "keywords": [
+    "expenses",
+    "split",
+    "bill-splitting",
+    "debt-settlement",
+    "money"
+  ],
   "type": "module",
-  "main": "src/app.js",
-  "bin": {
-    "js-cli-template": "src/app.js"
-  },
+  "main": "src/index.js",
+  "exports": "./src/index.js",
+  "files": [
+    "src"
+  ],
   "engines": {
     "node": ">=24.12.0"
   },
   "scripts": {
-    "start": "node src/app.js",
     "test": "vitest",
-    "test:run": "vitest run",
+    "test:run": "vitest run --passWithNoTests",
     "test:match": "vitest run -t",
     "lint": "eslint ./src --cache",
     "lint:fix": "eslint ./src --cache --fix",
     "format": "prettier --write ./src",
     "format:check": "prettier ./src --check"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/edvinkaradzas/split-ledger.git"
+  },
+  "bugs": {
+    "url": "https://github.com/edvinkaradzas/split-ledger/issues"
+  },
+  "homepage": "https://github.com/edvinkaradzas/split-ledger#readme",
+  "author": "Edvin Karadza",
   "contributors": [
-    "1dv610 Organization",
-    "YOUR NAME <YOUR EMAIL>"
+    "1dv610 Organization"
   ],
   "license": "Unlicense",
   "private": false,
