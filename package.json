@@ -1,0 +1,43 @@
+{
+  "name": "js-cli-template",
+  "version": "1.0.0",
+  "description": "1DV610 - JavaScript CLI Template / Boilerplate",
+  "type": "module",
+  "main": "src/app.js",
+  "bin": {
+    "js-cli-template": "src/app.js"
+  },
+  "engines": {
+    "node": ">=24.12.0"
+  },
+  "scripts": {
+    "start": "node src/app.js",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:match": "vitest run -t",
+    "lint": "eslint ./src --cache",
+    "lint:fix": "eslint ./src --cache --fix",
+    "format": "prettier --write ./src",
+    "format:check": "prettier ./src --check"
+  },
+  "contributors": [
+    "1dv610 Organization",
+    "YOUR NAME <YOUR EMAIL>"
+  ],
+  "license": "Unlicense",
+  "private": false,
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@lnu/eslint-config": "^2.0.13",
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "eslint": "^10.10.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-jsdoc": "^64.3.10",
+    "eslint-plugin-n": "^18.3.0",
+    "eslint-plugin-regexp": "^3.3.0",
+    "eslint-plugin-security": "^4.0.1",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.6",
+    "vitest": "^5.0.0"
+  }
+}
