@@ -30,4 +30,28 @@ export class Money {
   getKronor() {
     return this.#ore / 100
   }
+
+  /**
+   * Adds another amount to this one.
+   *
+   * @param {Money} other - The amount to add.
+   * @returns {Money} A new amount, the sum of the two.
+   */
+  add(other) {
+    const sum = this.#ore + other.#ore
+
+    return new Money(sum / 100)
+  }
+
+  /**
+   * Subtracts another amount from this one.
+   *
+   * @param {Money} other - The amount to subtract
+   * @returns {Money} A new amount, the difference of the two.
+   */
+  subtract(other) {
+    const difference = this.#ore - other.#ore
+
+    return new Money(difference / 100)
+  }
 }
