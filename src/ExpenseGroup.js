@@ -1,14 +1,26 @@
+/**
+ * Represents a group of people who share expenses, such as a trip or a household.
+ */
 export class ExpenseGroup {
   #members
-  #expenses
   #name
 
+  /**
+   * Creates a new group without any members.
+   *
+   * @param {string} name - The name of the group, for example 'Åre 2026'.
+   */
   constructor(name) {
     this.#name = name
     this.#members = []
-    this.#expenses = []
   }
 
+  /**
+   * Adds a member to the group.
+   *
+   * @param {string} name - The name of the member. Must be unique within the group.
+   * @throws {Error} If the name is empty or already used by another member.
+   */
   addMember(name) {
     if (typeof name !== 'string' || name.trim() === '') {
       throw new Error('This is not a valid name.')
@@ -20,5 +32,21 @@ export class ExpenseGroup {
     this.#members.push(name)
   }
 
-  getMembers() {}
+  /**
+   * Gets the members of the group.
+   *
+   * @returns {string[]} A copy of the member names, in the order they were added.
+   */
+  getMembers() {
+    return [...this.#members]
+  }
+
+  /**
+   * Gets the name of the group.
+   *
+   * @returns {string} The name given when the group was created.
+   */
+  getName() {
+    return this.#name
+  }
 }
