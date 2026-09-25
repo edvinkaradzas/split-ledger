@@ -55,11 +55,34 @@ describe('subtract', () => {
   })
 
   it('returns a negative amount when subtracting a larger amount', () => {
-    const coffe = new Money(24.5)
+    const coffee = new Money(24.5)
     const dinner = new Money(199.9)
 
-    const difference = coffe.subtract(dinner)
+    const difference = coffee.subtract(dinner)
 
     expect(difference.getKronor()).toBe(-175.4)
+  })
+})
+
+describe('allocate', () => {
+  it('splits an amount evenly when divided equally', () => {
+    const shares = new Money(900).allocate(3)
+
+    expect(shares.map((share) => share.getKronor())).toEqual([300, 300, 300])
+  })
+
+  it('gives the extra öre to the first parts', () => {
+    const shares = new Money(100).allocate(3)
+
+    expect(shares.map((share) => share.getOre())).toEqual([3334, 3333, 3333])
+  })
+
+  it('always adds up to the original amount', () => {
+    for (const parts of [2, 3, 6, 7]) {
+      const shares = new Money(100).allocate(parts)
+      const total = shares.reduce((sum, share) => sum + share.getOre(), 0)
+
+      expect(total).toBe(10000)
+    }
   })
 })
