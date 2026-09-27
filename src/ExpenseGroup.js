@@ -1,9 +1,12 @@
+import { Expense } from './Expense.js'
+
 /**
  * Represents a group of people who share expenses, such as a trip or a household.
  */
 export class ExpenseGroup {
   #members
   #name
+  #expenses
 
   /**
    * Creates a new group without any members.
@@ -13,6 +16,7 @@ export class ExpenseGroup {
   constructor(name) {
     this.#name = name
     this.#members = []
+    this.#expenses = []
   }
 
   /**
@@ -48,5 +52,39 @@ export class ExpenseGroup {
    */
   getName() {
     return this.#name
+  }
+
+  /**
+   * Adds an expense to the group.
+   *
+   * @param {object} details - The details of the expense.
+   * @param {string} details.description - What the expense was for, for example 'Dinner'.
+   * @param {string} details.paidBy - The name of the member who paid.
+   * @param {number} details.amount - The amount in kronor. Must be a positive number.
+   * @param {string[]} [details.participants] - The members who share the cost. Defaults to every member.
+   * @returns {Expense} The expense that was added.
+   * @throws {Error} If the payer or a participant is not a member, or the amount is not positive.
+   */
+  addExpense(details) {
+    const { description, paidBy, amount, participants } = details
+
+    if (!this.#members.includes(paidBy)) {
+      throw new Error(`Unknown member: ${paidBy}`)
+    }
+    if (!Number.isFinite(amount) || amount <= 0) {
+      throw new Error(`Amount must be a positive number. ${amount}`)
+    }
+
+    const splitBetween = participants ?? this.#members
+
+    if (!splitBetween.every((name) => this.#members.includes(name))) {
+      throw new Error('All participants must be members')
+    }
+
+    const expense = new Expense({ description, paidBy, amount, participants: splitBetween })
+
+    this.#expenses.push(expense)
+
+    return expense
   }
 }
