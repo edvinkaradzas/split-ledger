@@ -60,4 +60,26 @@ export class Expense {
   getParticipants() {
     return [...this.#participants]
   }
+
+  /**
+   * Calculates what each participant owes for this expense
+   *
+   * @returns {Map<string, Money>} One amount per participant. The payer gets any leftover öre.
+   */
+  getShares() {
+    const others = this.#participants.filter((name) => name !== this.#paidBy)
+
+    let ordered = others
+    if (this.#participants.includes(this.#paidBy)) {
+      ordered = [this.#paidBy, ...others]
+    }
+    const amounts = this.#amount.allocate(ordered.length)
+    const shares = new Map()
+
+    for (let i = 0; i < ordered.length; i++) {
+      shares.set(ordered[i], amounts[i])
+    }
+
+    return shares
+  }
 }
