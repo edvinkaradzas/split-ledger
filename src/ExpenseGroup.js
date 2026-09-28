@@ -1,4 +1,5 @@
 import { Expense } from './Expense.js'
+import { Money } from './Money.js'
 
 /**
  * Represents a group of people who share expenses, such as a trip or a household.
@@ -86,5 +87,29 @@ export class ExpenseGroup {
     this.#expenses.push(expense)
 
     return expense
+  }
+
+  /**
+   * Calculates the balance of every member: what they have paid minus what they have used.
+   *
+   * A positive balance means the member has paid more than their share, a negative balance means
+   * they owe money. All balances always add up to zero.
+   *
+   * @returns {Map<string, Money>} One balance per member.
+   */
+  getBalances() {
+    const balances = new Map()
+    for (const member of this.#members) {
+      balances.set(member, new Money(0))
+    }
+    for (const expense of this.#expenses) {
+      const payer = expense.getPaidBy()
+      balances.set(payer, balances.get(payer).add(expense.getAmount()))
+
+      for (const [name, share] of expense.getShares()) {
+        balances.set(name, balances.get(name).subtract(share))
+      }
+    }
+    return balances
   }
 }
