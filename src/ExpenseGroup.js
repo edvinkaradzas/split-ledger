@@ -1,5 +1,7 @@
 import { Expense } from './Expense.js'
 import { Money } from './Money.js'
+import { SettlementPlan } from './SettlementPlan.js'
+import { Transfer } from './Transfer.js'
 
 /**
  * Represents a group of people who share expenses, such as a trip or a household.
@@ -111,5 +113,51 @@ export class ExpenseGroup {
       }
     }
     return balances
+  }
+
+  /**
+   * Works out who should pay whom to make everyone even, using as few transfers as possible.
+   *
+   * Members who owe money are matched against members who are owed money, and each transfer settles
+   * as much as possible. A group of n members therefore needs at most n - 1 transfers.
+   *
+   * @returns {SettlementPlan} A plan with the transfers that settle the group.
+   */
+  getSettlementPlan() {
+    const debtors = []
+    const creditors = []
+    const transfers = []
+
+    for (const [name, balance] of this.getBalances()) {
+      if (balance.isZero()) {
+        continue
+      }
+      if (balance.isNegative()) {
+        debtors.push({ name, amount: new Money(0).subtract(balance) })
+      } else {
+        creditors.push({ name, amount: balance })
+      }
+    }
+    while (debtors.length > 0 && creditors.length > 0) {
+      const debtor = debtors[0]
+      const creditor = creditors[0]
+
+      let amount = creditor.amount
+
+      if (debtor.amount.isLessThan(creditor.amount)) {
+        amount = debtor.amount
+      }
+      transfers.push(new Transfer({ from: debtor.name, to: creditor.name, amount }))
+      debtor.amount = debtor.amount.subtract(amount)
+      creditor.amount = creditor.amount.subtract(amount)
+
+      if (debtor.amount.isZero()) {
+        debtors.shift()
+      }
+      if (creditor.amount.isZero()) {
+        creditors.shift()
+      }
+    }
+    return new SettlementPlan(transfers)
   }
 }
