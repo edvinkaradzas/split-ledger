@@ -75,4 +75,32 @@ export class Money {
     }
     return shares
   }
+
+  /**
+   * Checks whether this amount is smaller than another amount.
+   *
+   * @param {Money} other - The amount to compare with.
+   * @returns {boolean} True if this amount is strictly smaller than the other one.
+   */
+  isLessThan(other) {
+    return this.#ore < other.getOre()
+  }
+
+  /**
+   * Checks whether the amount is below zero, which means a debt.
+   *
+   * @returns {boolean} True if the amount is negative.
+   */
+  isNegative() {
+    return this.#ore < 0
+  }
+
+  /**
+   * Checks whether the amount is exactly zero.
+   *
+   * @returns {boolean} True if nothing is owed and nothing is due.
+   */
+  isZero() {
+    return this.#ore === 0
+  }
 }
