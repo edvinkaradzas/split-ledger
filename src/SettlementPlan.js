@@ -1,3 +1,5 @@
+/** @typedef {import('./Transfer.js').Transfer} Transfer */
+
 /**
  * Represents a plan for settling a group's debts: who should pay whom, and how much.
  */

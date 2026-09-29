@@ -1,3 +1,5 @@
+/** @typedef {import('./Money.js').Money} Money */
+
 /**
  * Represents a single payment that settles part of a debt: who pays whom, and how much.
  */
