@@ -145,4 +145,84 @@ describe('getShares', () => {
     expect(expense.getShares().has('Cia')).toBe(false)
     expect(trip.getBalances().get('Cia').isZero()).toBe(true)
   })
+
+  it('uses the exact amounts when they are given', () => {
+    const trip = groupWith(['Anna', 'Bo', 'Cia'])
+
+    trip.addExpense({
+      description: 'Dinner',
+      paidBy: 'Anna',
+      amount: 450,
+      exactAmounts: { Anna: 100, Bo: 150, Cia: 200 },
+    })
+
+    expect(trip.getBalances().get('Anna').getKronor()).toBe(350)
+    expect(trip.getBalances().get('Bo').getKronor()).toBe(-150)
+    expect(trip.getBalances().get('Cia').getKronor()).toBe(-200)
+  })
+})
+
+describe('addExpense', () => {
+  it('throws when the exact amounts do not add up to the total', () => {
+    const trip = groupWith(['Anna', 'Bo'])
+
+    expect(() =>
+      trip.addExpense({ description: 'Dinner', paidBy: 'Anna', amount: 150, exactAmounts: { Anna: 50, Bo: 99 } })
+    ).toThrow()
+  })
+
+  it('throws when the payer is not a member', () => {
+    const trip = groupWith(['Anna', 'Bo'])
+
+    expect(() => trip.addExpense({ description: 'Dinner', paidBy: 'Dan', amount: 150 })).toThrow()
+  })
+
+  it('throws when the amount is not positive', () => {
+    const trip = groupWith(['Anna', 'Bo'])
+
+    expect(() => trip.addExpense({ description: 'Dinner', paidBy: 'Anna', amount: 0 })).toThrow()
+  })
+
+  it('throws when a participant is not a member', () => {
+    const trip = groupWith(['Anna', 'Bo'])
+
+    expect(() =>
+      trip.addExpense({ description: 'Dinner', paidBy: 'Anna', amount: 150, participants: ['Anna', 'Dan'] })
+    ).toThrow()
+  })
+})
+
+describe('recordPayment', () => {
+  it('evens out the balances when a debt is paid', () => {
+    const trip = groupWith(['Anna', 'Bo'])
+    trip.addExpense({ description: 'Dinner', paidBy: 'Anna', amount: 200 })
+
+    trip.recordPayment({ from: 'Bo', to: 'Anna', amount: 100 })
+
+    expect(trip.getBalances().get('Anna').isZero()).toBe(true)
+    expect(trip.getBalances().get('Bo').isZero()).toBe(true)
+  })
+
+  it('throws when a member is unknown', () => {
+    const trip = groupWith(['Anna', 'Bo'])
+
+    expect(() => trip.recordPayment({ from: 'Dan', to: 'Anna', amount: 100 })).toThrow()
+  })
+
+  it('throws when the amount is not positive', () => {
+    const trip = groupWith(['Anna', 'Bo'])
+
+    expect(() => trip.recordPayment({ from: 'Bo', to: 'Anna', amount: -50 })).toThrow()
+  })
+})
+
+describe('Transfer', () => {
+  it('describes itself in a readable way', () => {
+    const trip = groupWith(['Anna', 'Bo'])
+    trip.addExpense({ description: 'Dinner', paidBy: 'Anna', amount: 300 })
+
+    const transfer = trip.getSettlementPlan().getTransfers()[0]
+
+    expect(String(transfer)).toBe('Bo pays Anna 150.00 kr')
+  })
 })
