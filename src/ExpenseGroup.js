@@ -217,7 +217,7 @@ export class ExpenseGroup {
   }
 
   /**
-   * Works out who should pay whom to make everyone even, using as few transfers as possible.
+   * Works out who should pay whom to make everyone even, keeping the number of transfers down.
    *
    * Members who owe money are matched against members who are owed money, and each transfer settles
    * as much as possible. A group of n members therefore needs at most n - 1 transfers.
