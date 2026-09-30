@@ -166,20 +166,11 @@ export class ExpenseGroup {
    * @returns {SettlementPlan} A plan with the transfers that settle the group.
    */
   getSettlementPlan() {
-    const debtors = []
-    const creditors = []
+    const balances = this.getBalances()
+    const debtors = this.#debtorsFrom(balances)
+    const creditors = this.#creditorsFrom(balances)
     const transfers = []
 
-    for (const [name, balance] of this.getBalances()) {
-      if (balance.isZero()) {
-        continue
-      }
-      if (balance.isNegative()) {
-        debtors.push({ name, amount: new Money(0).subtract(balance) })
-      } else {
-        creditors.push({ name, amount: balance })
-      }
-    }
     while (debtors.length > 0 && creditors.length > 0) {
       const debtor = debtors[0]
       const creditor = creditors[0]
@@ -189,20 +180,75 @@ export class ExpenseGroup {
       debtor.amount = debtor.amount.subtract(amount)
       creditor.amount = creditor.amount.subtract(amount)
 
-      if (debtor.amount.isZero()) {
-        debtors.shift()
-      }
-      if (creditor.amount.isZero()) {
-        creditors.shift()
-      }
+      this.#removeSettled(debtors, creditors)
     }
+
     return new SettlementPlan(transfers)
   }
 
+  /**
+   * Picks the smaller of two amounts.
+   *
+   * @param {Money} a - The first amount.
+   * @param {Money} b - The second amount.
+   * @returns {Money} The smaller amount, or b when they are equal.
+   */
   #smallestOf(a, b) {
     if (a.isLessThan(b)) {
       return a
     }
+
     return b
+  }
+
+  /**
+   * Finds the members who owe money.
+   *
+   * @param {Map<string, Money>} balances - The balances of the group.
+   * @returns {object[]} One entry per member who owes money, with the debt as a positive amount.
+   */
+  #debtorsFrom(balances) {
+    const debtors = []
+
+    for (const [name, balance] of balances) {
+      if (balance.isNegative()) {
+        debtors.push({ name, amount: new Money(0).subtract(balance) })
+      }
+    }
+
+    return debtors
+  }
+
+  /**
+   * Finds the members who are owed money.
+   *
+   * @param {Map<string, Money>} balances - The balances of the group.
+   * @returns {object[]} One entry per member who is owed money.
+   */
+  #creditorsFrom(balances) {
+    const creditors = []
+
+    for (const [name, balance] of balances) {
+      if (!balance.isNegative() && !balance.isZero()) {
+        creditors.push({ name, amount: balance })
+      }
+    }
+
+    return creditors
+  }
+
+  /**
+   * Removes the members who have nothing left to pay or receive.
+   *
+   * @param {object[]} debtors - The members who still owe money.
+   * @param {object[]} creditors - The members who are still owed money.
+   */
+  #removeSettled(debtors, creditors) {
+    if (debtors[0].amount.isZero()) {
+      debtors.shift()
+    }
+    if (creditors[0].amount.isZero()) {
+      creditors.shift()
+    }
   }
 }
