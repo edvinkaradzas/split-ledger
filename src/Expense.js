@@ -65,33 +65,62 @@ export class Expense {
   }
 
   /**
-   * Calculates what each participant owes for this expense
+   * Calculates what each participant owes for this expense.
    *
    * @returns {Map<string, Money>} One amount per participant. The payer gets any leftover öre.
    */
   getShares() {
     if (this.#exactAmounts) {
-      const shares = new Map()
-
-      for (const [name, amount] of Object.entries(this.#exactAmounts)) {
-        shares.set(name, new Money(amount))
-      }
-      return shares
+      return this.#exactShares()
     }
 
-    const others = this.#participants.filter((name) => name !== this.#paidBy)
+    return this.#equalShares()
+  }
 
-    let ordered = others
-    if (this.#participants.includes(this.#paidBy)) {
-      ordered = [this.#paidBy, ...others]
-    }
-    const amounts = this.#amount.allocate(ordered.length)
+  /**
+   * Builds the shares from the exact amounts given when the expense was created.
+   *
+   * @returns {Map<string, Money>} One amount per participant.
+   */
+  #exactShares() {
     const shares = new Map()
 
-    for (let i = 0; i < ordered.length; i++) {
-      shares.set(ordered[i], amounts[i])
+    for (const [name, shareAmount] of Object.entries(this.#exactAmounts)) {
+      shares.set(name, new Money(shareAmount))
     }
 
     return shares
+  }
+
+  /**
+   * Splits the amount equally between the participants.
+   *
+   * @returns {Map<string, Money>} One amount per participant, where the payer gets any leftover öre.
+   */
+  #equalShares() {
+    const payerFirst = this.#participantsWithPayerFirst()
+    const shareAmounts = this.#amount.allocate(payerFirst.length)
+    const shares = new Map()
+
+    for (let position = 0; position < payerFirst.length; position++) {
+      shares.set(payerFirst[position], shareAmounts[position])
+    }
+
+    return shares
+  }
+
+  /**
+   * Puts the payer first among the participants, so that the payer gets any leftover öre.
+   *
+   * @returns {string[]} The participants, with the payer first when the payer shares the cost.
+   */
+  #participantsWithPayerFirst() {
+    const otherParticipants = this.#participants.filter((name) => name !== this.#paidBy)
+
+    if (this.#participants.includes(this.#paidBy)) {
+      return [this.#paidBy, ...otherParticipants]
+    }
+
+    return otherParticipants
   }
 }
