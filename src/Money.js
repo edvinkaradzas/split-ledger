@@ -62,17 +62,16 @@ export class Money {
    * @returns {Money[]} One amount per part, where the first parts get any leftover öre.
    */
   allocate(parts) {
-    const base = Math.floor(this.#ore / parts)
-    const rest = this.#ore % parts
+    const baseShare = Math.floor(this.#ore / parts)
+    const leftoverOre = this.#ore % parts
     const shares = []
 
-    for (let i = 0; i < parts; i++) {
-      let shareInOre = base
-      if (i < rest) {
-        shareInOre = shareInOre + 1
-      }
-      shares.push(new Money(shareInOre / 100))
+    for (let position = 0; position < parts; position++) {
+      const extraOre = position < leftoverOre ? 1 : 0
+
+      shares.push(new Money((baseShare + extraOre) / 100))
     }
+
     return shares
   }
 

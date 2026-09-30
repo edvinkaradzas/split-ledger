@@ -76,35 +76,59 @@ export class ExpenseGroup {
    */
   addExpense(details) {
     const { description, paidBy, amount, participants, exactAmounts } = details
-
-    if (!this.#members.includes(paidBy)) {
-      throw new Error(`Unknown member: ${paidBy}`)
-    }
-    if (!Number.isFinite(amount) || amount <= 0) {
-      throw new Error(`Amount must be a positive number. ${amount}`)
-    }
-
     const splitBetween = exactAmounts ? Object.keys(exactAmounts) : (participants ?? this.#members)
 
-    if (!splitBetween.every((name) => this.#members.includes(name))) {
-      throw new Error('All participants must be members')
-    }
-
-    if (exactAmounts) {
-      let total = new Money(0)
-      for (const value of Object.values(exactAmounts)) {
-        total = total.add(new Money(value))
-      }
-      if (total.getOre() !== new Money(amount).getOre()) {
-        throw new Error(`The exact amounts must add up to ${amount}`)
-      }
-    }
+    this.#validateExpense({ paidBy, amount, splitBetween, exactAmounts })
 
     const expense = new Expense({ description, paidBy, amount, participants: splitBetween, exactAmounts })
 
     this.#expenses.push(expense)
 
     return expense
+  }
+
+  /**
+   * Checks that an expense can be added to the group.
+   *
+   * @param {object} details - The expense to check.
+   * @param {string} details.paidBy - The member who paid.
+   * @param {number} details.amount - The amount in kronor.
+   * @param {string[]} details.splitBetween - The members who share the cost.
+   * @param {object} [details.exactAmounts] - The exact amount per member, when there is one.
+   * @throws {Error} If the payer or a participant is unknown, the amount is not positive, or the
+   *   exact amounts do not add up to the total.
+   */
+  #validateExpense({ paidBy, amount, splitBetween, exactAmounts }) {
+    if (!this.#members.includes(paidBy)) {
+      throw new Error(`Unknown member: ${paidBy}`)
+    }
+    if (!Number.isFinite(amount) || amount <= 0) {
+      throw new Error(`Amount must be a positive number. ${amount}`)
+    }
+    if (!splitBetween.every((name) => this.#members.includes(name))) {
+      throw new Error('All participants must be members')
+    }
+    if (exactAmounts && !this.#addsUpTo(exactAmounts, amount)) {
+      throw new Error(`The exact amounts must add up to ${amount}`)
+    }
+  }
+
+  /**
+   * Checks whether a set of exact amounts adds up to a total, compared in whole öre so that the
+   * comparison is exact.
+   *
+   * @param {object} exactAmounts - The amount per member, in kronor.
+   * @param {number} total - The total the amounts must add up to, in kronor.
+   * @returns {boolean} True if the amounts add up to the total.
+   */
+  #addsUpTo(exactAmounts, total) {
+    let sum = new Money(0)
+
+    for (const shareAmount of Object.values(exactAmounts)) {
+      sum = sum.add(new Money(shareAmount))
+    }
+
+    return sum.getOre() === new Money(total).getOre()
   }
 
   /**
@@ -224,16 +248,16 @@ export class ExpenseGroup {
   /**
    * Picks the smaller of two amounts.
    *
-   * @param {Money} a - The first amount.
-   * @param {Money} b - The second amount.
-   * @returns {Money} The smaller amount, or b when they are equal.
+   * @param {Money} amount - The first amount.
+   * @param {Money} otherAmount - The second amount.
+   * @returns {Money} The smaller amount, or otherAmount when they are equal.
    */
-  #smallestOf(a, b) {
-    if (a.isLessThan(b)) {
-      return a
+  #smallestOf(amount, otherAmount) {
+    if (amount.isLessThan(otherAmount)) {
+      return amount
     }
 
-    return b
+    return otherAmount
   }
 
   /**
