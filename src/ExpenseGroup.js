@@ -138,23 +138,58 @@ export class ExpenseGroup {
    * @returns {Map<string, Money>} One balance per member.
    */
   getBalances() {
+    const balances = this.#startingBalances()
+
+    for (const expense of this.#expenses) {
+      this.#applyExpense(balances, expense)
+    }
+    for (const payment of this.#payments) {
+      this.#applyPayment(balances, payment)
+    }
+
+    return balances
+  }
+
+  /**
+   * Creates a balance of zero for every member.
+   *
+   * @returns {Map<string, Money>} One balance per member, all of them zero.
+   */
+  #startingBalances() {
     const balances = new Map()
+
     for (const member of this.#members) {
       balances.set(member, new Money(0))
     }
-    for (const expense of this.#expenses) {
-      const payer = expense.getPaidBy()
-      balances.set(payer, balances.get(payer).add(expense.getAmount()))
 
-      for (const [name, share] of expense.getShares()) {
-        balances.set(name, balances.get(name).subtract(share))
-      }
-    }
-    for (const payment of this.#payments) {
-      balances.set(payment.from, balances.get(payment.from).add(payment.amount))
-      balances.set(payment.to, balances.get(payment.to).subtract(payment.amount))
-    }
     return balances
+  }
+
+  /**
+   * Adds an expense to the balances: the payer is credited the whole amount, and every participant
+   * is charged their share.
+   *
+   * @param {Map<string, Money>} balances - The balances to update.
+   * @param {Expense} expense - The expense to apply.
+   */
+  #applyExpense(balances, expense) {
+    const payer = expense.getPaidBy()
+    balances.set(payer, balances.get(payer).add(expense.getAmount()))
+
+    for (const [name, share] of expense.getShares()) {
+      balances.set(name, balances.get(name).subtract(share))
+    }
+  }
+
+  /**
+   * Adds a payment to the balances: the member who paid is credited, the receiver is charged.
+   *
+   * @param {Map<string, Money>} balances - The balances to update.
+   * @param {object} payment - The payment to apply.
+   */
+  #applyPayment(balances, payment) {
+    balances.set(payment.from, balances.get(payment.from).add(payment.amount))
+    balances.set(payment.to, balances.get(payment.to).subtract(payment.amount))
   }
 
   /**
