@@ -65,11 +65,15 @@ export class ExpenseGroup {
    * @param {string} details.paidBy - The name of the member who paid.
    * @param {number} details.amount - The amount in kronor. Must be a positive number.
    * @param {string[]} [details.participants] - The members who share the cost. Defaults to every member.
+   * @param {object} [details.exactAmounts] - The amount in kronor per member, when the cost is not
+   *   shared equally. The amounts must add up to the total, and the members listed become the
+   *   participants.
    * @returns {Expense} The expense that was added.
-   * @throws {Error} If the payer or a participant is not a member, or the amount is not positive.
+   * @throws {Error} If the payer or a participant is not a member, the amount is not positive, or the
+   *   exact amounts do not add up to the total.
    */
   addExpense(details) {
-    const { description, paidBy, amount, participants } = details
+    const { description, paidBy, amount, participants, exactAmounts } = details
 
     if (!this.#members.includes(paidBy)) {
       throw new Error(`Unknown member: ${paidBy}`)
@@ -78,13 +82,23 @@ export class ExpenseGroup {
       throw new Error(`Amount must be a positive number. ${amount}`)
     }
 
-    const splitBetween = participants ?? this.#members
+    const splitBetween = exactAmounts ? Object.keys(exactAmounts) : (participants ?? this.#members)
 
     if (!splitBetween.every((name) => this.#members.includes(name))) {
       throw new Error('All participants must be members')
     }
 
-    const expense = new Expense({ description, paidBy, amount, participants: splitBetween })
+    if (exactAmounts) {
+      let total = new Money(0)
+      for (const value of Object.values(exactAmounts)) {
+        total = total.add(new Money(value))
+      }
+      if (total.getOre() !== new Money(amount).getOre()) {
+        throw new Error(`The exact amounts must add up to ${amount}`)
+      }
+    }
+
+    const expense = new Expense({ description, paidBy, amount, participants: splitBetween, exactAmounts })
 
     this.#expenses.push(expense)
 

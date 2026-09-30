@@ -8,6 +8,7 @@ export class Expense {
   #paidBy
   #amount
   #participants
+  #exactAmounts
 
   /**
    * Creates a new expense.
@@ -17,12 +18,14 @@ export class Expense {
    * @param {string} details.paidBy - The name of the member who paid.
    * @param {number} details.amount - The amount in kronor.
    * @param {string[]} details.participants - The names of the members who share the cost.
+   * @param {object} [details.exactAmounts] - Optional exact amount in kronor per participant.
    */
-  constructor({ description, paidBy, amount, participants }) {
+  constructor({ description, paidBy, amount, participants, exactAmounts }) {
     this.#description = description
     this.#paidBy = paidBy
     this.#amount = new Money(amount)
     this.#participants = [...participants]
+    this.#exactAmounts = exactAmounts
   }
 
   /**
@@ -67,6 +70,15 @@ export class Expense {
    * @returns {Map<string, Money>} One amount per participant. The payer gets any leftover öre.
    */
   getShares() {
+    if (this.#exactAmounts) {
+      const shares = new Map()
+
+      for (const [name, amount] of Object.entries(this.#exactAmounts)) {
+        shares.set(name, new Money(amount))
+      }
+      return shares
+    }
+
     const others = this.#participants.filter((name) => name !== this.#paidBy)
 
     let ordered = others
