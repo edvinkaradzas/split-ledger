@@ -10,6 +10,7 @@ export class ExpenseGroup {
   #members
   #name
   #expenses
+  #payments
 
   /**
    * Creates a new group without any members.
@@ -20,6 +21,7 @@ export class ExpenseGroup {
     this.#name = name
     this.#members = []
     this.#expenses = []
+    this.#payments = []
   }
 
   /**
@@ -106,6 +108,28 @@ export class ExpenseGroup {
   }
 
   /**
+   * Records a payment that one member has already made to another, for example a Swish payment.
+   *
+   * @param {object} payment - The payment.
+   * @param {string} payment.from - The member who paid.
+   * @param {string} payment.to - The member who received the money.
+   * @param {number} payment.amount - The amount in kronor. Must be a positive number.
+   * @throws {Error} If either member is unknown, or the amount is not positive.
+   */
+  recordPayment({ from, to, amount }) {
+    if (!this.#members.includes(from)) {
+      throw new Error(`Unknown member: ${from}`)
+    }
+    if (!this.#members.includes(to)) {
+      throw new Error(`Unknown member: ${to}`)
+    }
+    if (!Number.isFinite(amount) || amount <= 0) {
+      throw new Error(`Amount must be a positive number. ${amount}`)
+    }
+    this.#payments.push({ from, to, amount: new Money(amount) })
+  }
+
+  /**
    * Calculates the balance of every member: what they have paid minus what they have used.
    *
    * A positive balance means the member has paid more than their share, a negative balance means
@@ -125,6 +149,10 @@ export class ExpenseGroup {
       for (const [name, share] of expense.getShares()) {
         balances.set(name, balances.get(name).subtract(share))
       }
+    }
+    for (const payment of this.#payments) {
+      balances.set(payment.from, balances.get(payment.from).add(payment.amount))
+      balances.set(payment.to, balances.get(payment.to).subtract(payment.amount))
     }
     return balances
   }
