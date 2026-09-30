@@ -24,8 +24,8 @@ The tests are of three kinds:
 To run the tests you need Node.js 24.12.0 or later (I used v24.21.0):
 
 ```bash
-git clone https://github.com/edvinkaradzas/laboration-2.git
-cd laboration-2
+git clone https://github.com/edvinkaradzas/split-ledger.git
+cd split-ledger
 npm install
 npm run test:run
 ```
