@@ -183,12 +183,8 @@ export class ExpenseGroup {
     while (debtors.length > 0 && creditors.length > 0) {
       const debtor = debtors[0]
       const creditor = creditors[0]
+      const amount = this.#smallestOf(debtor.amount, creditor.amount)
 
-      let amount = creditor.amount
-
-      if (debtor.amount.isLessThan(creditor.amount)) {
-        amount = debtor.amount
-      }
       transfers.push(new Transfer({ from: debtor.name, to: creditor.name, amount }))
       debtor.amount = debtor.amount.subtract(amount)
       creditor.amount = creditor.amount.subtract(amount)
@@ -201,5 +197,12 @@ export class ExpenseGroup {
       }
     }
     return new SettlementPlan(transfers)
+  }
+
+  #smallestOf(a, b) {
+    if (a.isLessThan(b)) {
+      return a
+    }
+    return b
   }
 }
