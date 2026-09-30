@@ -1,6 +1,6 @@
 {
   "name": "split-ledger",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Track shared group expenses and calculate who owes whom, with as few transfers as possible.",
   "keywords": [
     "expenses",
