@@ -34,11 +34,11 @@ export class Money {
   /**
    * Adds another amount to this one.
    *
-   * @param {Money} other - The amount to add.
+   * @param {Money} otherAmount - The amount to add.
    * @returns {Money} A new amount, the sum of the two.
    */
-  add(other) {
-    const sum = this.#ore + other.#ore
+  add(otherAmount) {
+    const sum = this.#ore + otherAmount.#ore
 
     return new Money(sum / 100)
   }
@@ -46,11 +46,11 @@ export class Money {
   /**
    * Subtracts another amount from this one.
    *
-   * @param {Money} other - The amount to subtract.
+   * @param {Money} otherAmount - The amount to subtract.
    * @returns {Money} A new amount, the difference of the two.
    */
-  subtract(other) {
-    const difference = this.#ore - other.#ore
+  subtract(otherAmount) {
+    const difference = this.#ore - otherAmount.#ore
 
     return new Money(difference / 100)
   }
@@ -58,15 +58,15 @@ export class Money {
   /**
    * Splits the amount into a number of parts.
    *
-   * @param {number} parts - The number of parts to split into.
+   * @param {number} partCount - The number of parts to split into.
    * @returns {Money[]} One amount per part, where the first parts get any leftover öre.
    */
-  allocate(parts) {
-    const baseShare = Math.floor(this.#ore / parts)
-    const leftoverOre = this.#ore % parts
+  allocate(partCount) {
+    const baseShare = Math.floor(this.#ore / partCount)
+    const leftoverOre = this.#ore % partCount
     const shares = []
 
-    for (let position = 0; position < parts; position++) {
+    for (let position = 0; position < partCount; position++) {
       const extraOre = position < leftoverOre ? 1 : 0
 
       shares.push(new Money((baseShare + extraOre) / 100))
@@ -78,11 +78,11 @@ export class Money {
   /**
    * Checks whether this amount is smaller than another amount.
    *
-   * @param {Money} other - The amount to compare with.
+   * @param {Money} otherAmount - The amount to compare with.
    * @returns {boolean} True if this amount is strictly smaller than the other one.
    */
-  isLessThan(other) {
-    return this.#ore < other.getOre()
+  isLessThan(otherAmount) {
+    return this.#ore < otherAmount.getOre()
   }
 
   /**

@@ -36,10 +36,10 @@ export class SettlementPlan {
   /**
    * Gets the transfers a single member has to pay.
    *
-   * @param {string} name - The name of the member.
+   * @param {string} payer - The name of the member.
    * @returns {Transfer[]} The transfers where the member is the payer, or an empty array if there are none.
    */
-  getTransfersFrom(name) {
-    return this.#transfers.filter((transfer) => transfer.getFrom() === name)
+  getTransfersFrom(payer) {
+    return this.#transfers.filter((transfer) => transfer.getFrom() === payer)
   }
 }
