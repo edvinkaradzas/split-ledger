@@ -192,6 +192,46 @@ describe('addExpense', () => {
   })
 })
 
+describe('getExpenses', () => {
+  it('returns the expenses in the order they were added', () => {
+    const trip = groupWith(['Anna', 'Bo'])
+    trip.addExpense({ description: 'Cabin', paidBy: 'Anna', amount: 900 })
+    trip.addExpense({ description: 'Taxi', paidBy: 'Bo', amount: 300 })
+
+    const descriptions = trip.getExpenses().map((expense) => expense.getDescription())
+
+    expect(descriptions).toEqual(['Cabin', 'Taxi'])
+  })
+
+  it('returns a copy that cannot change the group', () => {
+    const trip = groupWith(['Anna'])
+    trip.addExpense({ description: 'Cabin', paidBy: 'Anna', amount: 900 })
+
+    trip.getExpenses().pop()
+
+    expect(trip.getExpenses()).toHaveLength(1)
+  })
+})
+
+describe('removeExpense', () => {
+  it('removes the expense and updates the balances', () => {
+    const trip = groupWith(['Anna', 'Bo'])
+    const cabin = trip.addExpense({ description: 'Cabin', paidBy: 'Anna', amount: 900 })
+    trip.addExpense({ description: 'Taxi', paidBy: 'Bo', amount: 300 })
+
+    trip.removeExpense(cabin.getId())
+
+    expect(trip.getExpenses()).toHaveLength(1)
+    expect(trip.getBalances().get('Anna').getKronor()).toBe(-150)
+  })
+
+  it('throws when the id is unknown', () => {
+    const trip = groupWith(['Anna'])
+
+    expect(() => trip.removeExpense(999)).toThrow()
+  })
+})
+
 describe('recordPayment', () => {
   it('evens out the balances when a debt is paid', () => {
     const trip = groupWith(['Anna', 'Bo'])
