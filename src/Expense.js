@@ -4,6 +4,7 @@ import { Money } from './Money.js'
  * Represents a single expense: what it was, who paid for it and who shares the cost.
  */
 export class Expense {
+  #id
   #description
   #paidBy
   #amount
@@ -14,18 +15,29 @@ export class Expense {
    * Creates a new expense.
    *
    * @param {object} details - The details of the expense.
+   * @param {number} details.id - The ID of the expense.
    * @param {string} details.description - What the expense was for, for example 'Dinner'.
    * @param {string} details.paidBy - The name of the member who paid.
    * @param {number} details.amount - The amount in kronor.
    * @param {string[]} details.participants - The names of the members who share the cost.
    * @param {object} [details.exactAmounts] - Optional exact amount in kronor per participant.
    */
-  constructor({ description, paidBy, amount, participants, exactAmounts }) {
+  constructor({ id, description, paidBy, amount, participants, exactAmounts }) {
+    this.#id = id
     this.#description = description
     this.#paidBy = paidBy
     this.#amount = new Money(amount)
     this.#participants = [...participants]
     this.#exactAmounts = exactAmounts
+  }
+
+  /**
+   * Gets the ID of the expense.
+   *
+   * @returns {number} The ID.
+   */
+  getId() {
+    return this.#id
   }
 
   /**
