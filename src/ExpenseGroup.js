@@ -11,6 +11,7 @@ export class ExpenseGroup {
   #name
   #expenses
   #payments
+  #nextExpenseId
 
   /**
    * Creates a new group without any members.
@@ -22,6 +23,7 @@ export class ExpenseGroup {
     this.#members = []
     this.#expenses = []
     this.#payments = []
+    this.#nextExpenseId = 1
   }
 
   /**
@@ -80,7 +82,9 @@ export class ExpenseGroup {
 
     this.#validateExpense({ paidBy, amount, splitBetween, exactAmounts })
 
-    const expense = new Expense({ description, paidBy, amount, participants: splitBetween, exactAmounts })
+    const id = this.#nextExpenseId++
+
+    const expense = new Expense({ description, paidBy, amount, participants: splitBetween, exactAmounts, id })
 
     this.#expenses.push(expense)
 
@@ -129,6 +133,30 @@ export class ExpenseGroup {
     }
 
     return sum.getOre() === new Money(total).getOre()
+  }
+
+  /**
+   * Gets the expenses of a group.
+   *
+   * @returns {Expense[]} A copy of the expenses, in the order they were added.
+   */
+  getExpenses() {
+    return [...this.#expenses]
+  }
+
+  /**
+   * Removes an expense from the group.
+   *
+   * @param {number} id - The ID of the expense to remove.
+   * @throws {Error} If the expense is not found.
+   */
+  removeExpense(id) {
+    const position = this.#expenses.findIndex((expense) => expense.getId() === id)
+
+    if (position === -1) {
+      throw new Error(`Expense with ID ${id} not found`)
+    }
+    this.#expenses.splice(position, 1)
   }
 
   /**
