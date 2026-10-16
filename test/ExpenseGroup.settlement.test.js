@@ -160,6 +160,16 @@ describe('getShares', () => {
     expect(trip.getBalances().get('Bo').getKronor()).toBe(-150)
     expect(trip.getBalances().get('Cia').getKronor()).toBe(-200)
   })
+
+  it('does not change when the caller changes the exact amounts afterwards', () => {
+    const trip = groupWith(['Anna', 'Bo'])
+    const amounts = { Anna: 100, Bo: 50 }
+    const expense = trip.addExpense({ description: 'Dinner', paidBy: 'Anna', amount: 150, exactAmounts: amounts })
+
+    amounts.Anna = 9999
+
+    expect(expense.getShares().get('Anna').getKronor()).toBe(100)
+  })
 })
 
 describe('addExpense', () => {

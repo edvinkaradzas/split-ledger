@@ -28,7 +28,7 @@ export class Expense {
     this.#paidBy = paidBy
     this.#amount = new Money(amount)
     this.#participants = [...participants]
-    this.#exactAmounts = exactAmounts
+    this.#exactAmounts = exactAmounts ? { ...exactAmounts } : undefined
   }
 
   /**
