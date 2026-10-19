@@ -9,6 +9,7 @@ build your own app on: a trip planner, a household budget, a chat bot or a comma
 
 - Keeps track of the members and expenses of a group.
 - Splits an expense equally between the participants, or by exact amounts per person.
+- Lists the expenses of a group, and removes one that was entered by mistake.
 - Calculates each member's balance: what they have paid compared to what they have used.
 - Creates a settlement plan: who pays whom, in at most n−1 transfers for a group of n members.
 - Records payments that have already been made, so a group can keep going after settling up.
@@ -23,8 +24,7 @@ build your own app on: a trip planner, a household budget, a chat bot or a comma
 - Handle more than one currency — every amount in a group is in kronor, and no exchange rates are
   fetched or converted.
 - Split by percentage or by shares — an expense is either split equally or by exact amounts.
-- Change or remove an expense once it has been added. To correct a mistake, build the group again
-  from your own data.
+- Change an expense once it has been added. To correct a mistake, remove it and add it again.
 - Guarantee the theoretically smallest number of transfers. The settlement uses a greedy algorithm,
   which always settles the group in at most n−1 transfers for n members, but a different combination
   can occasionally need one transfer less.
@@ -94,6 +94,8 @@ You only create `ExpenseGroup` yourself. The other classes are returned by the m
 | `getMembers()` | Returns the member names. |
 | `getName()` | Returns the name of the group. |
 | `addExpense(details)` | Adds an expense and returns it as an `Expense`. |
+| `getExpenses()` | Returns the expenses, in the order they were added. |
+| `removeExpense(id)` | Removes one expense. Throws if no expense has that id. |
 | `recordPayment({ from, to, amount })` | Records a payment one member has already made to another. |
 | `getBalances()` | Returns a `Map` from member name to `Money`. A positive balance means the member has paid more than their share. |
 | `getSettlementPlan()` | Returns a `SettlementPlan` with the transfers that settle the group. |
@@ -110,8 +112,9 @@ You only create `ExpenseGroup` yourself. The other classes are returned by the m
 
 ### Expense
 
-`getDescription()`, `getPaidBy()`, `getAmount()`, `getParticipants()` and `getShares()`, where
-`getShares()` returns a `Map` from participant name to the `Money` that person owes for the expense.
+`getId()`, `getDescription()`, `getPaidBy()`, `getAmount()`, `getParticipants()` and `getShares()`,
+where `getShares()` returns a `Map` from participant name to the `Money` that person owes for the
+expense. The id is given by the group and is what `removeExpense` takes.
 
 ### SettlementPlan
 
