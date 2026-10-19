@@ -103,17 +103,38 @@ export class ExpenseGroup {
    *   exact amounts do not add up to the total.
    */
   #validateExpense({ paidBy, amount, splitBetween, exactAmounts }) {
-    if (!this.#members.includes(paidBy)) {
-      throw new Error(`Unknown member: ${paidBy}`)
-    }
-    if (!Number.isFinite(amount) || amount <= 0) {
-      throw new Error(`Amount must be a positive number. ${amount}`)
-    }
-    if (!splitBetween.every((name) => this.#members.includes(name))) {
-      throw new Error('All participants must be members')
+    this.#validateMember(paidBy)
+    this.#validateAmount(amount)
+
+    for (const name of splitBetween) {
+      this.#validateMember(name)
     }
     if (exactAmounts && !this.#addsUpTo(exactAmounts, amount)) {
       throw new Error(`The exact amounts must add up to ${amount}`)
+    }
+  }
+
+  /**
+   * Checks that a member is part of the group.
+   *
+   * @throws {Error} If the member is unknown.
+   * @param {string} name - The name of the member to check.
+   */
+  #validateMember(name) {
+    if (!this.#members.includes(name)) {
+      throw new Error(`Unknown member: ${name}`)
+    }
+  }
+
+  /**
+   * Validates that an amount is a positive number.
+   *
+   * @throws {Error} If the amount is not a positive number.
+   * @param {number} amount - The amount to validate.
+   */
+  #validateAmount(amount) {
+    if (!Number.isFinite(amount) || amount <= 0) {
+      throw new Error(`Amount must be a positive number, but was ${amount}`)
     }
   }
 
@@ -169,15 +190,10 @@ export class ExpenseGroup {
    * @throws {Error} If either member is unknown, or the amount is not positive.
    */
   recordPayment({ from, to, amount }) {
-    if (!this.#members.includes(from)) {
-      throw new Error(`Unknown member: ${from}`)
-    }
-    if (!this.#members.includes(to)) {
-      throw new Error(`Unknown member: ${to}`)
-    }
-    if (!Number.isFinite(amount) || amount <= 0) {
-      throw new Error(`Amount must be a positive number. ${amount}`)
-    }
+    this.#validateMember(from)
+    this.#validateMember(to)
+    this.#validateAmount(amount)
+
     this.#payments.push({ from, to, amount: new Money(amount) })
   }
 
